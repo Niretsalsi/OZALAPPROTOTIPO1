@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Guardianes Ciudadanos · INE Jóvenes</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="platform.css">
+<link rel="modulepreload" href="platform-data.js">
+<style>body{margin:0}a{color:inherit}a:hover{color:inherit}</style>
+</helmet>
+<div class="app-shell {{ flowClass }}">
+  <a class="skip-link" href="#mira">Saltar al mapa</a>
+  <header class="site-header">
+    <a class="brand" href="#inicio" aria-label="Guardianes Ciudadanos, inicio">
+      <span class="brand-mark">INE</span>
+      <span class="brand-copy"><strong>JÓVENES</strong><small>Guardianes Ciudadanos</small></span>
+    </a>
+    <button type="button" class="gn-burger" aria-label="Menú" aria-expanded="{{ menuOpen }}" onClick="{{ toggleMenu }}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"></path></svg></button>
+    <nav class="gn-nav {{ navClass }}" aria-label="Navegación principal">
+      <button type="button" class="{{ nav0 }}" onClick="{{ openExplore }}"><strong>EXPLORAR</strong><span>Mapa y datos</span></button>
+      <button type="button" class="{{ nav1 }}" onClick="{{ openParticipa }}"><strong>PARTICIPA</strong><span>De mirar a actuar</span></button>
+      <button type="button" class="{{ nav2 }}" onClick="{{ openGlosario }}"><strong>GLOSARIO</strong><span>Lo cívico, explicado fácil</span></button>
+      <button type="button" class="{{ nav3 }}" onClick="{{ openFuentes }}"><strong>FUENTES</strong><span>Sobre los datos</span></button>
+      <button type="button" onClick="{{ share }}"><strong>COMPARTE</strong><span>{{ shareSub }}</span></button>
+    </nav>
+  </header>
+
+  <main class="map-workspace" id="inicio" aria-label="Mapa de participación electoral">
+    <section class="intro-slide" aria-label="Introducción" onWheel="{{ onWheel }}" onMouseMove="{{ bump }}" onTouchStart="{{ tStart }}" onTouchEnd="{{ tEnd }}">
+      <div class="is-inner">
+        <div class="is-head"><em class="is-kicker">Guardianes Ciudadanos · INE Jóvenes</em><h1>¿Cómo votó tu estado?</h1></div>
+        <div class="is-art" aria-hidden="false"><span class="hc-ring"></span><img src="assets/gato-urna.png" alt="Guardián Ciudadano, un gato urbano celebrando con la señal de paz" width="320" height="320"><span class="hc-bubble">¡Tu voto<br>sí cuenta!</span></div>
+        <div class="is-body">
+          <p>Tu voto sí se ve y sí cuenta. Descubre cuántas personas votaron en tu estado y en tu municipio en 2024.</p>
+          <div class="is-search">
+            <label for="intro-q">Búscalo aquí</label>
+            <div class="search-box">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+              <input id="intro-q" type="search" placeholder="Escribe tu estado" autocomplete="off" value="{{ q }}" onInput="{{ onQ }}" onFocus="{{ qFocus }}">
+              <button type="button" class="search-list-btn" onClick="{{ toggleList }}" aria-label="Ver lista de estados"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"></path></svg><span>Lista</span></button>
+              <sc-if value="{{ qOpen }}" hint-placeholder-val="{{ false }}">
+                <ul class="search-results">
+                  <sc-for list="{{ qResults }}" as="o" hint-placeholder-count="3"><li><button type="button" onClick="{{ o.click }}"><b>{{ o.code }}</b>{{ o.name }}</button></li></sc-for>
+                  <sc-if value="{{ qEmpty }}" hint-placeholder-val="{{ false }}"><li class="search-empty">Sin resultados</li></sc-if>
+                </ul>
+              </sc-if>
+            </div>
+          </div>
+          <button type="button" class="is-cta" onClick="{{ goMap }}">o explora el mapa de México <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button>
+        </div>
+      </div>
+    </section>
+    <button type="button" class="slide-arrow sa-next" aria-label="Siguiente: mapa" onClick="{{ goMap }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"></path></svg></button>
+    <button type="button" class="slide-arrow sa-prev" aria-label="Anterior: inicio" onClick="{{ goIntro }}"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 5-7 7 7 7"></path></svg></button>
+    <div class="slide-dots" role="tablist" aria-label="Pasos"><button type="button" role="tab" aria-label="Paso 1: inicio" class="{{ dot1 }}" onClick="{{ goIntro }}"></button><button type="button" role="tab" aria-label="Paso 2: mapa" class="{{ dot2 }}" onClick="{{ goMap }}"></button></div>
+    <section class="explorer section-pad" id="mira">
+      <div class="mexico-map-module">
+        <div class="map-toolbar">
+          <button type="button" class="flow-back" onClick="{{ flowBack }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"></path></svg>{{ flowBackLabel }}</button>
+          <div>
+            <select class="census-year-select" aria-label="Año del censo" value="{{ year }}" onChange="{{ onYear }}">
+              <sc-for list="{{ years }}" as="y" hint-placeholder-count="3"><option value="{{ y }}">{{ y }}</option></sc-for>
+            </select>
+          </div>
+          <div class="search-box">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+            <input type="search" placeholder="Busca tu estado…" aria-label="Buscar estado" value="{{ q }}" onInput="{{ onQ }}" onFocus="{{ qFocus }}">
+            <button type="button" class="search-list-btn" onClick="{{ toggleList }}" aria-label="Ver lista de estados" title="Ver lista de estados"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"></path></svg><span>Lista</span></button>
+            <sc-if value="{{ qOpen }}" hint-placeholder-val="{{ false }}">
+              <ul class="search-results">
+                <sc-for list="{{ qResults }}" as="o" hint-placeholder-count="3"><li><button type="button" onClick="{{ o.click }}"><b>{{ o.code }}</b>{{ o.name }}</button></li></sc-for>
+                <sc-if value="{{ qEmpty }}" hint-placeholder-val="{{ false }}"><li class="search-empty">Sin resultados</li></sc-if>
+              </ul>
+            </sc-if>
+          </div>
+        </div>
+
+        <div class="mexico-map-stage">
+          <div class="hero-cat" aria-hidden="false"><span class="hc-ring"></span><span class="hc-dots"></span><img src="assets/gato-urna.png" alt="Guardián Ciudadano, un gato urbano celebrando con la señal de paz" width="320" height="320"><span class="hc-bubble">¡Tu voto<br>sí cuenta!</span><span class="hc-tag">GUARDIÁN CIUDADANO</span></div>
+          <div class="map-instructions">
+            <em class="ins-kicker">Guardianes Ciudadanos</em>
+            <strong>¿Y si votamos?</strong>
+            <span>{{ instructions }}</span>
+            <sc-if value="{{ noData }}" hint-placeholder-val="{{ false }}"><span role="status">Aún no tenemos datos de {{ year }}. Mostramos el Censo 2020.</span></sc-if>
+          </div>
+
+          <div style="position:absolute;inset:0;display:{{ loadingDisplay }};align-items:center;justify-content:center;color:#5b3a82;font-weight:700;font-size:13px;z-index:0">Cargando mapa…</div>
+          <svg class="{{ svgClass }}" viewBox="{{ viewBox }}" onPointerDown="{{ pDown }}" onPointerMove="{{ pMove }}" onPointerUp="{{ pUp }}" onPointerCancel="{{ pUp }}" onWheel="{{ onWheel }}" style="touch-action:none;cursor:grab" role="group" aria-label="Mapa interactivo de los 32 estados de México">
+            <g>
+              <sc-for list="{{ paths }}" as="p" hint-placeholder-count="3">
+                <path class="{{ p.cls }}" d="{{ p.d }}" style="fill: {{ p.fill }}" role="button" tabindex="0" aria-label="{{ p.label }}"
+                  onMouseEnter="{{ p.enter }}" onMouseMove="{{ onMove }}" onMouseLeave="{{ hide }}" onClick="{{ p.click }}"></path>
+              </sc-for>
+            </g>
+          </svg>
+
+          <button type="button" class="map-open-overlay" onClick="{{ openFull }}" aria-label="Abrir el mapa en pantalla completa"><span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3H3v6M15 21h6v-6M3 3l7 7M21 21l-7-7"></path></svg>Toca el mapa para abrirlo en pantalla completa</span></button>
+          <div class="flow-hint"><strong>Navega por el mapa para explorar tu municipio.</strong><sc-if value="{{ noData }}" hint-placeholder-val="{{ false }}"><span role="status">Aún no tenemos datos de {{ year }}. Mostramos el Censo 2020.</span></sc-if></div>
+          <div class="map-coach" role="dialog" aria-label="Cómo usar el mapa">
+            <strong>Navega por el mapa para explorar tu municipio.</strong>
+            <ul><li><b>Pellizca</b> o usa + y − para acercar</li><li><b>Arrastra</b> con el dedo para moverte</li><li><b>Toca un estado</b> para ver sus datos</li></ul>
+            <button type="button" onClick="{{ dismissCoach }}">Entendido</button>
+          </div>
+          <div class="map-legend" aria-label="Leyenda del mapa">
+            <sc-if value="{{ isFiltered }}" hint-placeholder-val="{{ false }}">
+              <div class="metric-legend" role="status">
+                <strong>{{ metricLabel }} · 2024</strong>
+                <div class="metric-gradient"></div>
+                <div class="metric-range"><span>{{ maxLabel }}</span><span>{{ minLabel }}</span></div>
+                <small class="metric-note">Más oscuro = mayor porcentaje</small>
+              </div>
+            </sc-if>
+            <sc-if value="{{ notFiltered }}" hint-placeholder-val="{{ true }}">
+              <span><i class="legend-default"></i> Estado</span>
+              <span><i class="legend-hover"></i> En foco</span>
+              <span><i class="legend-selected"></i> Seleccionado</span>
+            </sc-if>
+          </div>
+
+          <sc-if value="{{ tooltip }}" hint-placeholder-val="{{ false }}">
+            <div class="map-tooltip {{ tooltip.cls }}" role="status" style="left: {{ tooltip.left }}px; top: {{ tooltip.top }}px; display: block"><i class="tip-arrow" style="top: {{ tooltip.arrowTop }}px"></i>
+              <span>{{ tooltip.source }}</span>
+              <strong>{{ tooltip.name }}</strong>
+              <p>{{ tooltip.fact }}</p>
+              <small>Toca para ver el detalle</small>
+            </div>
+          </sc-if>
+        </div>
+
+        <nav class="workspace-tools" aria-label="Herramientas del mapa">
+          <a href="#mira" aria-label="Explorar mapa" onClick="{{ resetMetric }}">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15M15 6v15"></path></svg>
+            <span>Explorar</span>
+          </a>
+          <div class="nav-zoom" aria-label="Zoom del mapa">
+            <button type="button" onClick="{{ zoomOut }}" disabled="{{ zoomMin }}" aria-label="Alejar mapa">−</button>
+            <button type="button" onClick="{{ zoomIn }}" disabled="{{ zoomMax }}" aria-label="Acercar mapa">+</button>
+            <button type="button" onClick="{{ zoomReset }}" disabled="{{ zoomMin }}" aria-label="Restablecer zoom"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"></path></svg></button>
+          </div>
+          <button type="button" class="help-btn" onClick="{{ toggleCoach }}" aria-label="Ayuda: cómo usar el mapa" title="Ayuda"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"></circle><path d="M9.5 9.2a2.6 2.6 0 0 1 5 .9c0 1.7-2.5 2.2-2.5 3.9M12 17.3v.2"></path></svg></button>
+          <div class="map-filter-control">
+            <button class="filter-trigger" type="button" onClick="{{ toggleFilters }}">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 7h16M7 12h10M10 17h4"></path></svg>
+              {{ filterTriggerLabel }}
+              <sc-if value="{{ isFiltered }}" hint-placeholder-val="{{ false }}"><span class="filter-percentage">{{ filterTriggerPct }}</span></sc-if>
+            </button>
+            <sc-if value="{{ filtersOpen }}" hint-placeholder-val="{{ false }}">
+              <div class="map-filter-options">
+                <strong>¿Cómo se votó?</strong>
+                <small>{{ filterSub }}</small>
+                <sc-for list="{{ filterOptions }}" as="f" hint-placeholder-count="4">
+                  <button type="button" disabled="{{ f.disabled }}" aria-pressed="{{ f.pressed }}" onClick="{{ f.click }}">
+                    <span>{{ f.label }}</span>
+                    <span class="filter-option-meta"><span class="filter-percentage" style="display: {{ f.pctDisplay }}">{{ f.pct }}</span><span>{{ f.check }}</span></span>
+                  </button>
+                </sc-for>
+              </div>
+            </sc-if>
+          </div>
+        </nav>
+
+        <div class="{{ backdropClass }}" onClick="{{ closeDrawer }}" aria-hidden="true"></div>
+
+        <aside class="{{ drawerClass }}" aria-label="Perfil del estado" onScroll="{{ onDrawerScroll }}">
+          <sc-if value="{{ st }}" hint-placeholder-val="{{ false }}">
+            <div class="drawer-topbar"><button class="drawer-map" type="button" onClick="{{ closeDrawer }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3zM9 3v15M15 6v15"></path></svg>Regresar al mapa</button><span class="drawer-viewing"><small>Estás viendo</small><strong>{{ st.name }}</strong></span><button class="drawer-home" type="button" onClick="{{ goHome }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 6-6 6 6 6"></path></svg>Regresar a inicio</button></div>
+            <div class="drawer-topline">
+              <span>CLAVE INEGI · {{ st.code }}</span>
+              <div class="drawer-window-actions">
+                <button type="button" class="drawer-expand-button" onClick="{{ toggleExpand }}" aria-label="Expandir drawer">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="{{ expandIcon }}"></path></svg>
+                </button>
+                <button type="button" onClick="{{ closeDrawer }}" aria-label="Cerrar perfil del estado">×</button>
+              </div>
+            </div>
+            <nav class="crumbs" aria-label="Estás aquí">
+              <button type="button" onClick="{{ closeDrawer }}">México</button><span aria-hidden="true">›</span>
+              <button type="button" onClick="{{ muniBack }}" aria-current="{{ crumbStateCurrent }}">{{ st.name }}</button>
+              <sc-if value="{{ muni }}" hint-placeholder-val="{{ false }}"><span aria-hidden="true">›</span><b aria-current="page">{{ muniName }}</b></sc-if>
+            </nav>
+            <div class="drawer-heading">
+              <span class="drawer-state-code">{{ st.code }}</span>
+              <div><p>{{ st.officialName }}</p><h3>{{ st.name }}</h3><span>Capital · {{ st.capital }}</span></div>
+            </div>
+
+            <sc-if value="{{ geo }}" hint-placeholder-val="{{ false }}">
+              <section class="municipal-explorer">
+                <div class="municipal-map-heading"><strong>{{ muniHeading }}</strong><span>{{ muniCount }}</span></div>
+                <button class="municipal-return-state" type="button" onClick="{{ muniBack }}" disabled="{{ muniNone }}">{{ muniBackLabel }}</button>
+                <div class="municipal-zoom-controls">
+                  <button type="button" onClick="{{ mZoomOut }}" disabled="{{ mZoomMin }}">−</button>
+                  <span>{{ mZoomPct }}%</span>
+                  <button type="button" onClick="{{ mZoomIn }}" disabled="{{ mZoomMax }}">+</button>
+                  <button type="button" onClick="{{ mZoomReset }}">Restablecer</button>
+                  <b class="muni-label" aria-live="polite">{{ muniName }}</b>
+                </div>
+                <svg class="municipal-zoom-map" viewBox="{{ muniViewBox }}" role="group" onPointerDown="{{ mDown }}" onPointerMove="{{ mMove }}" onPointerUp="{{ mUp }}" onPointerCancel="{{ mUp }}" onWheel="{{ mWheel }}" style="touch-action:none">
+                  <sc-for list="{{ munis }}" as="m" hint-placeholder-count="3">
+                    <path d="{{ m.d }}" class="{{ m.cls }}" tabindex="0" onMouseEnter="{{ m.enter }}" onMouseLeave="{{ m.leave }}" onClick="{{ m.click }}"></path>
+                  </sc-for>
+                </svg>
+                                <sc-if value="{{ muni }}" hint-placeholder-val="{{ false }}"><p class="municipal-data-notice" role="status">{{ muniName }}. Todavía no tenemos datos electorales de este municipio. Toca «Volver a los datos de {{ st.name }}» para ver el estado completo.</p></sc-if>
+                <small>Límites: INEGI · Marco Geoestadístico, diciembre 2025.</small>
+              </section>
+            </sc-if>
+            <div class="data-slider" hidden="{{ muniSelected }}">
+              <sc-if value="{{ isElection }}" hint-placeholder-val="{{ true }}">
+                <div class="cmp" aria-label="Participación frente al promedio nacional">
+                  <div class="cmp-head"><b>Participación {{ d.votedPct }}</b><span>Lugar {{ d.rank }} de 32</span></div>
+                  <div class="cmp-track"><span class="cmp-fill" style="width: {{ d.votedW }}"></span><i class="cmp-mark" style="left: {{ d.natW }}"></i></div>
+                  <div class="cmp-foot"><span>0%</span><span class="cmp-nat" style="left: {{ d.natW }}">Nacional {{ d.natLabel }}</span><span>100%</span></div>
+                </div>
+                <section class="story" aria-label="Analogía: tu estado en 100 personas">
+                  <div class="story-left"><div class="story-scene"><div class="story-grid" aria-hidden="true"><sc-for list="{{ story.dots }}" as="p" hint-placeholder-count="20"><i class="{{ p.cls }}" style="background: {{ p.c }}"></i></sc-for></div><img class="{{ story.catCls }}" src="assets/gato-senala-v2.png" alt="El Guardián Ciudadano señala la cuadrícula de 100 personas" width="565" height="700"></div></div>
+                  <div class="story-right">
+                    <div class="story-titlebar"><h4>{{ story.title }}</h4></div>
+                    <ul class="story-key"><sc-for list="{{ story.keys }}" as="k" hint-placeholder-count="3"><li><span class="{{ k.cls }}"><i style="background: {{ k.c }}"></i><b>{{ k.n }}</b> {{ k.label }}</span></li></sc-for></ul>
+                    <p class="story-cap" aria-live="polite">{{ story.cap }}</p>
+                    <sc-if value="{{ story.done }}" hint-placeholder-val="{{ false }}"><div class="story-end"><div class="fun-fact"><small>Dato curioso</small><p>{{ story.stadium }}</p></div></div></sc-if>
+                    
+                  </div>
+                </section>
+                <div class="drawer-stats election-drawer-stats">
+                  <button type="button" class="vote-card vc-y {{ vcyCls }}" style="--vc:#5b3a82" aria-expanded="{{ vcyOpen }}" onClick="{{ vcyToggle }}">
+                    <span class="vc-q">¿Cuántos sí votaron?</span>
+                    <strong class="vc-num">{{ d.voted }}</strong>
+                    <sc-if value="{{ vcyClosed }}" hint-placeholder-val="{{ true }}"><span class="vc-cta">Toca para ver el detalle</span></sc-if>
+                    <sc-if value="{{ vcyOpen }}" hint-placeholder-val="{{ false }}"><span class="vc-detail">
+                      <svg class="vc-pie" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="50" fill="#ece6f5"></circle><circle class="vc-slice" cx="50" cy="50" r="25" fill="none" stroke="#5b3a82" stroke-width="50" style="stroke-dasharray: {{ vcyDash }} 157.08"></circle></svg>
+                      <span class="vc-text"><b class="vc-pct">{{ d.votedPct }}</b><span class="vc-lab">de la lista nominal sí votó</span><span class="vc-det">Personas con credencial vigente que acudieron a las urnas y emitieron un voto válido.</span></span>
+                    </span></sc-if>
+                  </button>
+                  <button type="button" class="vote-card vc-n {{ vcnCls }}" style="--vc:#b83280" aria-expanded="{{ vcnOpen }}" onClick="{{ vcnToggle }}">
+                    <span class="vc-q">¿Cuántos no votaron?</span>
+                    <strong class="vc-num">{{ d.not }}</strong>
+                    <sc-if value="{{ vcnClosed }}" hint-placeholder-val="{{ true }}"><span class="vc-cta">Toca para ver el detalle</span></sc-if>
+                    <sc-if value="{{ vcnOpen }}" hint-placeholder-val="{{ false }}"><span class="vc-detail">
+                      <svg class="vc-pie" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="50" fill="#ece6f5"></circle><circle class="vc-slice" cx="50" cy="50" r="25" fill="none" stroke="#b83280" stroke-width="50" style="stroke-dasharray: {{ vcnDash }} 157.08"></circle></svg>
+                      <span class="vc-text"><b class="vc-pct">{{ d.notPct }}</b><span class="vc-lab">de la lista nominal no votó</span><span class="vc-det">Personas con credencial vigente que no acudieron a votar.</span></span>
+                    </span></sc-if>
+                  </button>
+                  <button type="button" class="vote-card vc-a {{ vcaCls }}" style="--vc:#c9973f" aria-expanded="{{ vcaOpen }}" onClick="{{ vcaToggle }}">
+                    <span class="vc-q">¿Cuántos anularon su voto?</span>
+                    <strong class="vc-num">{{ d.ann }}</strong>
+                    <sc-if value="{{ vcaClosed }}" hint-placeholder-val="{{ true }}"><span class="vc-cta">Toca para ver el detalle</span></sc-if>
+                    <sc-if value="{{ vcaOpen }}" hint-placeholder-val="{{ false }}"><span class="vc-detail">
+                      <svg class="vc-pie" viewBox="0 0 100 100" aria-hidden="true"><circle cx="50" cy="50" r="50" fill="#ece6f5"></circle><circle class="vc-slice" cx="50" cy="50" r="25" fill="none" stroke="#c9973f" stroke-width="50" style="stroke-dasharray: {{ vcaDash }} 157.08"></circle></svg>
+                      <span class="vc-text"><b class="vc-pct">{{ d.annPct }}</b><span class="vc-lab">de la lista nominal anuló</span><span class="vc-det">Boletas sin validez: marcadas de forma incorrecta o dejadas en blanco.</span></span>
+                    </span></sc-if>
+                  </button>
+                  <div class="gender-info">
+                    <div class="gi-tabs" role="tablist">
+                      <button type="button" role="tab" aria-selected="{{ gTabIml }}" onClick="{{ setIml }}">IML <span class="gi-sub">(Hombres por cada 100 mujeres con credencial)</span></button>
+                      <button type="button" role="tab" aria-selected="{{ gTabImv }}" onClick="{{ setImv }}">IMV <span class="gi-sub">(Hombres por cada 100 mujeres que sí votaron)</span></button>
+                    </div>
+                    <h4 class="gi-title">{{ g.official }}</h4>
+                    <div class="gi-chart">
+                      <svg viewBox="0 0 100 100" class="gi-donut" role="img" aria-label="Proporción de mujeres y hombres">
+                        <circle cx="50" cy="50" r="38" fill="none" stroke="#5b3a82" stroke-width="16"></circle>
+                        <circle cx="50" cy="50" r="38" fill="none" stroke="#b83280" stroke-width="16" transform="rotate(-90 50 50)" style="stroke-dasharray: {{ g.dash }}; transition: stroke-dasharray .9s cubic-bezier(.3,.8,.3,1)"></circle>
+                        <text x="50" y="56" text-anchor="middle" font-size="19" font-weight="900" fill="#40265f">{{ g.value }}</text>
+                      </svg>
+                      <div class="gi-legend">
+                        <p><i style="background:#b83280"></i><span><b>{{ g.womenPct }}</b> mujeres</span></p>
+                        <p><i style="background:#5b3a82"></i><span><b>{{ g.menPct }}</b> hombres</span></p>
+                      </div>
+                    </div>
+                    <p class="gi-note">Por cada 100 mujeres hay <strong>{{ g.value }}</strong> hombres.</p>
+                  </div>
+                </sc-if>
+              <sc-if value="{{ notElection }}" hint-placeholder-val="{{ false }}">
+                <div class="drawer-population"><small>Población total</small><strong>{{ c.pop }}</strong><span>habitantes contabilizados</span></div>
+                <div class="drawer-stats">
+                  <article><small>Mujeres</small><strong>{{ c.women }}%</strong><div><span style="width: {{ c.women }}%"></span></div></article>
+                  <article><small>Hombres</small><strong>{{ c.men }}%</strong><div><span style="width: {{ c.men }}%"></span></div></article>
+                  <article><small>Edad mediana</small><strong>{{ c.age }} años</strong></article>
+                  <article><small>Densidad</small><strong>{{ c.density }}</strong><span>hab. / km²</span></article>
+                </div>
+              </sc-if>
+            </div>
+            <section class="related" aria-label="Sigue explorando">
+              <div class="related-head"><h4><button type="button" class="related-back" onClick="{{ backToState }}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 15 6-6 6 6"></path></svg>Sigue explorando tu estado</button></h4><img src="assets/urna-v2.png" alt="Una mano deposita un voto en la urna"></div>
+              <div class="related-grid">
+                <sc-for list="{{ related }}" as="x" hint-placeholder-count="4">
+                  <button type="button" class="related-card" onClick="{{ x.click }}">
+                    <small>{{ x.tag }}</small><strong>{{ x.name }}</strong>
+                    <span class="rel-track"><span style="width: {{ x.w }}"></span></span><em>{{ x.val }}</em>
+                  </button>
+                </sc-for>
+              </div>
+            </section>
+                        <p class="drawer-source">{{ sourceNote }}</p>
+            
+          </sc-if>
+        </aside>
+        <sc-if value="{{ dockOn }}" hint-placeholder-val="{{ false }}"><div class="muni-dock"><div class="search-box muni-search">
+                  <input type="search" placeholder="Buscar municipio…" aria-label="Buscar municipio" value="{{ mq }}" onInput="{{ onMq }}">
+                  <button type="button" class="search-list-btn" onClick="{{ toggleMList }}" aria-label="Ver lista de municipios"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"></path></svg><span>Lista</span></button>
+                  <sc-if value="{{ mqOpen }}" hint-placeholder-val="{{ false }}">
+                    <ul class="search-results">
+                      <sc-for list="{{ mqResults }}" as="o" hint-placeholder-count="3"><li><button type="button" onClick="{{ o.click }}">{{ o.name }}</button></li></sc-for>
+                      <sc-if value="{{ mqEmpty }}" hint-placeholder-val="{{ false }}"><li class="search-empty">Sin resultados</li></sc-if>
+                    </ul>
+                  </sc-if>
+                </div></div></sc-if>
+        <sc-if value="{{ st }}" hint-placeholder-val="{{ false }}"><button type="button" class="scroll-hint-fixed" style="opacity: {{ hintOpacity }}; pointer-events: {{ hintEvents }}" onClick="{{ scrollDown }}" aria-label="Desliza para ver más"><span>Desliza para ver más</span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg></button></sc-if>
+      </div>
+    </section>
+    <section class="gn-panel" aria-label="De mirar a participar" data-screen-label="Participa" style="display:{{ showParticipa }}">
+      <div class="gn-inner">
+        <button type="button" class="gn-close" onClick="{{ openExplore }}" aria-label="Cerrar y volver al mapa"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg><span>Volver al mapa</span></button>
+        <header class="gn-head"><em>Ya viste los datos</em><h2>Ahora, a participar</h2><p>Dos formas de usar lo que sabes para mover a tu comunidad.</p></header>
+        <div class="gn-cards">
+          <article class="gn-card">
+            <span class="gn-num">01</span><span class="gn-tag">Habla</span>
+            <h3>¿Qué le falta a tu comunidad?</h3>
+            <p>Cuéntanos qué es lo más urgente donde vives. Cada idea suma al radar ciudadano.</p>
+            <div class="gn-pills" role="group" aria-label="Tema">
+              <sc-for list="{{ cats }}" as="c" hint-placeholder-count="5"><button type="button" class="{{ c.cls }}" aria-pressed="{{ c.on }}" onClick="{{ c.click }}">{{ c.name }}</button></sc-for>
+            </div>
+            <form class="gn-form" onSubmit="{{ submitPost }}">
+              <label for="gn-post">Escribe lo urgente de tu estado y visualiza las propuestas</label>
+              <div class="gn-field"><input id="gn-post" type="text" maxlength="80" placeholder="Ej. agua, seguridad, salud" value="{{ post }}" onInput="{{ onPost }}"><button type="submit" aria-label="Enviar idea"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg></button></div>
+            </form>
+            <sc-if value="{{ posted }}" hint-placeholder-val="{{ false }}"><p class="gn-ok" role="status"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"></path></svg> Gracias. Tu idea ya está en el radar: “{{ posted }}”</p></sc-if>
+
+            <p class="gn-stat"><b>62%</b> de las y los jóvenes pone Seguridad y Educación al frente.</p>
+          </article>
+          <article class="gn-card">
+            <span class="gn-num">02</span><span class="gn-tag">Conoce</span>
+            <h3>Quién decide, con datos</h3>
+            <p>Infórmate sobre trayectoria, propuestas y transparencia de cada candidatura. Información neutral, sin sesgo partidista.</p>
+            <sc-if value="{{ fOpen }}" hint-placeholder-val="{{ false }}">
+              <div class="fx-wrap" role="region" aria-live="polite" aria-label="Ficha informativa de candidatura">
+                <p class="fx-ask"><small>Tu problema</small><b>“{{ posted }}”</b><span class="fx-chip">{{ fCat }}</span></p>
+                <sc-if value="{{ fLoad }}" hint-placeholder-val="{{ true }}"><p class="fx-load" role="status"><i></i><i></i><i></i> Buscando propuestas…</p></sc-if>
+                <div class="fx-grid">
+                  <sc-for list="{{ fichas }}" as="f" hint-placeholder-count="2">
+                    <article class="fx-card" style="animation-delay: {{ f.delay }}">
+                      <header><span class="fx-av" style="background: {{ f.color }}">{{ f.ini }}</span><div><strong>{{ f.name }}</strong><small>{{ f.role }}</small></div></header>
+                      <h4>Trayectoria</h4><p>{{ f.tray }}</p>
+                      <h4>Propuestas clave</h4>
+                      <ul><sc-for list="{{ f.props }}" as="p" hint-placeholder-count="2"><li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"></path></svg><span>{{ p }}</span></li></sc-for></ul>
+                    </article>
+                  </sc-for>
+                </div>
+                <p class="fx-note">Información neutral del INE, en orden alfabético. Ejemplo ilustrativo: no son personas reales.</p>
+                <button type="button" class="fx-reset" onClick="{{ fMoreOpen }}">Ver más candidatos</button>
+              </div>
+            </sc-if>
+            <sc-if value="{{ fClosed }}" hint-placeholder-val="{{ true }}"><div class="gn-vs gn-one" aria-hidden="true"><div class="gn-vs-h"><span>?</span><b>Ficha informativa</b></div>
+              <div class="gn-vs-r"><i><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"></path></svg></i><b>Trayectoria</b></div>
+              <div class="gn-vs-r"><i><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"></path></svg></i><b>Propuestas clave</b></div>
+              <div class="gn-vs-r"><i><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"></path></svg></i><b>Transparencia</b></div></div>
+            <span class="gn-soon">Escribe tu problema en HABLA</span></sc-if>
+          </article>
+          </div>
+        <p class="gn-closing">Tu participación es nuestro poder. <b>#TuVozCuenta</b></p>
+      </div>
+    </section>
+    <section class="gn-panel" aria-label="Glosario" data-screen-label="Glosario" style="display:{{ showGlosario }}">
+      <div class="gn-inner gn-narrow">
+        <button type="button" class="gn-close" onClick="{{ openExplore }}" aria-label="Cerrar y volver al mapa"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg><span>Volver al mapa</span></button>
+        <header class="gn-head"><em>Glosario · Claro y sin rodeos</em><h2>Lo cívico, explicado fácil</h2></header>
+        <div class="gn-gloss">
+          <sc-for list="{{ gloss }}" as="g" hint-placeholder-count="4"><article class="{{ g.cls }}"><button type="button" aria-expanded="{{ g.open }}" onClick="{{ g.click }}"><span class="gn-gnum">{{ g.n }}</span><strong>{{ g.term }}</strong><span class="gn-gt">{{ g.sign }}</span></button><div class="gn-ga"><p>{{ g.def }}</p></div></article></sc-for>
+        </div>
+      </div>
+    </section>
+    <section class="gn-panel" aria-label="Fuentes" data-screen-label="Fuentes" style="display:{{ showFuentes }}">
+      <div class="gn-inner gn-narrow">
+        <button type="button" class="gn-close" onClick="{{ openExplore }}" aria-label="Cerrar y volver al mapa"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"></path></svg><span>Volver al mapa</span></button>
+        <header class="gn-head"><em>Sobre los datos</em><h2>De dónde sale cada número</h2></header>
+        <div class="gn-src">
+          <div class="gn-src-brand"><span class="brand-mark">INE</span><p><strong>Guardianes Ciudadanos</strong><br>Datos sin rodeos.</p></div>
+          <p>Todas las cifras de participación vienen de los Conteos Censales de Participación Ciudadana (CCPC) del Instituto Nacional Electoral (INE).</p>
+          <p class="gn-priv"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="10" width="14" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg> Datos abiertos, hechos por y para la ciudadanía.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+</div>
+
+<sc-if value="{{ fMore }}" hint-placeholder-val="{{ false }}">
+<div class="fm-screen" role="dialog" aria-modal="true" aria-label="Todas las candidaturas">
+  <div class="fm-bar"><div><small>Tu problema · {{ fCat }}</small><h2>Todas las candidaturas</h2></div><button type="button" class="fm-x" onClick="{{ fMoreClose }}">Cerrar <span aria-hidden="true">×</span></button></div>
+  <div class="fm-grid">
+    <sc-for list="{{ fichasFull }}" as="f" hint-placeholder-count="3">
+      <article class="fm-card">
+        <header><span class="fx-av" style="background: {{ f.color }}">{{ f.ini }}</span><div><strong>{{ f.name }}</strong><small>{{ f.role }}</small></div></header>
+        <h4>Trayectoria</h4><p>{{ f.tray }}</p>
+        <h4>Propuestas clave</h4>
+        <ul><sc-for list="{{ f.props }}" as="p" hint-placeholder-count="3"><li><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4 4L19 6"></path></svg><span>{{ p }}</span></li></sc-for></ul>
+      </article>
+    </sc-for>
+  </div>
+  <p class="fx-note">Información neutral del INE, en orden alfabético. Ejemplo ilustrativo: no son personas reales.</p>
+  <button type="button" class="fx-reset" onClick="{{ fMoreClose }}">Probar con otro problema</button>
+</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { fMore: false, fOpen: false, fLoad: false, vc: '', sp: 0, sHi: -1, panel: '', menuOpen: false, cat: 3, post: '', posted: '', copied: false, gIdx: 0, stopped: false, leaving: false, step: 'intro', full: false, coach: false, D: null, year: 2024, code: '', muni: '', expanded: false, metric: 'none', filtersOpen: false, hovered: '', tip: null, view: { x: 0, y: 0, zoom: 1 }, geo: null, mHover: '', mView: { x: 0, y: 0, zoom: 1 }, hint: 1, gTab: 'iml', q: '', qOpen: false, listOpen: false, mListOpen: false, mq: '' };
+  componentDidMount() {
+    import('./platform-data.js').then(D => this.setState({ D }));
+    this._key = e => { if (e.key === 'Escape' && this.state.panel) { this.setState({ panel: '' }); return; } if (this.state.panel || document.activeElement.tagName === 'INPUT') return; if (e.key === 'ArrowRight') this.advance('map'); else if (e.key === 'ArrowLeft') this.advance('intro'); };
+    window.addEventListener('keydown', this._key);
+    this._hh = () => { const el = document.querySelector('.site-header'); if (el && el.offsetHeight) document.documentElement.style.setProperty('--hh', el.offsetHeight + 'px'); };
+    window.addEventListener('resize', this._hh); setTimeout(this._hh, 0);
+    
+  }
+  componentDidUpdate() {
+    this._hh && this._hh();
+    const el = document.querySelector('.story');
+    if (el !== this._storyEl) {
+      this._io && this._io.disconnect(); this._storyEl = el;
+      if (el && 'IntersectionObserver' in window) { this._io = new IntersectionObserver(es => { if (es[0].isIntersecting && !this._played) { this._played = true; this.playStory(); } }, { root: document.querySelector('.state-drawer'), threshold: 0.45 }); this._io.observe(el); }
+    }
+  }
+  componentWillUnmount() { this._io && this._io.disconnect(); window.removeEventListener('resize', this._hh); window.removeEventListener('keydown', this._key); }
+  advance(to) { const s = this.state; const t = to || (s.step === 'intro' ? 'map' : 'intro'); if (s.leaving || s.full || s.step === t) return; this._t = 0; this.setState({ leaving: true }); setTimeout(() => this.setState({ step: t, leaving: false }), 480); }
+  swap() { this.advance(); }
+  loadGeo(code) {
+    this.setState({ geo: null });
+    fetch('municipalities/' + code + '.json').then(r => r.json()).then(g => { if (this.state.code === code) this.setState({ geo: g }); }).catch(() => {});
+  }
+  playStory() { clearInterval(this._sp); this.setState({ sp: 0, sHi: -1 }); this._sp = setInterval(() => { const n = this.state.sp + 4; if (n >= 100) { clearInterval(this._sp); this.setState({ sp: 100 }); } else this.setState({ sp: n }); }, 90); }
+  select(code) { this._played = false; clearInterval(this._sp); this.setState({ sp: 0, sHi: -1 }); this._h = 1; this.setState({ mView: { x: 0, y: 0, zoom: 1 } }); if (this.state.code && this.state.code !== code) this._hist = (this._hist || []).concat(this.state.code); this.setState({ step: 'map', q: '', qOpen: false, listOpen: false, mq: '', code, muni: '', hint: 1, tip: null, hovered: '', mView: { x: 0, y: 0, zoom: 1 } }); if (code) this.loadGeo(code); }
+  zoom(key, f, w, h) {
+    this.setState(s => {
+      const v = s[key], zoom = Math.max(1, Math.min(6, v.zoom * f));
+      const cl = (x, m) => Math.max(0, Math.min(m, x));
+      return { [key]: zoom === 1 ? { x: 0, y: 0, zoom } : { zoom, x: cl(v.x + w / v.zoom / 2 - w / zoom / 2, w - w / zoom), y: cl(v.y + h / v.zoom / 2 - h / zoom / 2, h - h / zoom) } };
+    });
+  }
+  mapGeom(el) {
+    const b = el.getBoundingClientRect(), cs = getComputedStyle(el), pl = parseFloat(cs.paddingLeft), pr = parseFloat(cs.paddingRight), pt = parseFloat(cs.paddingTop), pb = parseFloat(cs.paddingBottom);
+    return { b, cw: b.width - pl - pr, ch: b.height - pt - pb, cx: b.left + pl + (b.width - pl - pr) / 2, cy: b.top + pt + (b.height - pt - pb) / 2 };
+  }
+  panZoom(el, a, b, ratio, key = 'view', W = 900, H = 560) {
+    const g = this.mapGeom(el), cl = (x, m) => Math.max(-W * 0.6, Math.min(m + W * 0.6, x));
+    this.setState(s => {
+      const v = s[key], zoom = Math.max(1, Math.min(6, v.zoom * ratio));
+      const sc = Math.max(W / v.zoom / g.cw, H / v.zoom / g.ch), ns = sc * v.zoom / zoom;
+      const x = v.x + W / v.zoom / 2 + (a.x - g.cx) * sc - (b.x - g.cx) * ns - W / zoom / 2;
+      const y = v.y + H / v.zoom / 2 + (a.y - g.cy) * sc - (b.y - g.cy) * ns - H / zoom / 2;
+      return { [key]: { zoom, x: cl(x, W - W / zoom), y: cl(y, H - H / zoom) } };
+    });
+  }
+  renderVals() {
+    const s = this.state, D = s.D, nf = new Intl.NumberFormat('es-MX');
+    if (!D) return { flowClass: 'flow-intro', flowBackLabel: 'Inicio', instructions: '', filterTriggerLabel: '¿Cómo se votó?', loadingDisplay: 'flex', paths: [], years: [], stateOptions: [], filterOptions: [], munis: [], muniOptions: [], st: null, geo: null, tooltip: null, svgClass: 'mexico-map-svg', viewBox: '0 0 900 560', zoomPct: 100, notFiltered: true, drawerClass: 'state-drawer', backdropClass: 'map-drawer-backdrop' };
+    const { statesData, statesByCode, mexicoStatePaths, election2024, election2024Totals, electionValue } = D;
+    const sb = D.statesByCode || new Map(statesData.map(x => [x.code, x]));
+    const isElection = s.year === 2024, hasData = isElection || s.year === 2020;
+    const metricIndex = s.metric === 'voted' ? 3 : s.metric === 'annulled' ? 6 : 4;
+    const metricLabel = s.metric === 'voted' ? 'Sí votaron' : s.metric === 'annulled' ? 'Votos anulados' : 'No votaron';
+    const isFiltered = isElection && s.metric !== 'none';
+    const vals = Array.from(election2024.values(), r => r[metricIndex]), min = Math.min(...vals), max = Math.max(...vals);
+    const fact = c => { const r = election2024.get(c); return isFiltered ? `${metricLabel}: ${r[metricIndex].toFixed(1)}% (${nf.format(r[s.metric === 'voted' ? 1 : s.metric === 'annulled' ? 5 : 2])} ${s.metric === 'annulled' ? 'votos' : 'personas'}).` : `${r[3]}% votó y ${r[4]}% no votó. En total, ${nf.format(r[1])} personas fueron a las urnas.`; };
+    const stage = e => e.currentTarget.ownerSVGElement.closest('.mexico-map-stage').getBoundingClientRect();
+    const paths = mexicoStatePaths.filter(p => sb.get(p.code)).map(p => {
+      const st = sb.get(p.code);
+      return {
+        d: p.d, label: st.name,
+        cls: 'mexico-state' + (s.code === p.code ? ' is-selected' : '') + (s.hovered === p.code ? ' is-hovered' : ''),
+        fill: isFiltered ? `color-mix(in srgb, #e7dff0, #40265f ${15 + 85 * (election2024.get(p.code)[metricIndex] - min) / (max - min)}%)` : '',
+        enter: e => { const b = stage(e); this.setState({ hovered: p.code, tip: { st, fact: isElection ? fact(p.code) : st.curiosidades[Math.floor(Math.random() * st.curiosidades.length)], x: e.clientX - b.left, y: e.clientY - b.top, w: b.width, h: b.height } }); },
+        click: () => { if (this._drag) return; this.select(p.code); },
+      };
+    });
+    const nz = x => x.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const qn = nz(s.q.trim()), mqn = nz(s.mq.trim());
+    const qRes = (qn || s.listOpen) ? statesData.filter(x => nz(x.name).includes(qn)).slice(0, qn ? 8 : 32).map(x => ({ code: x.code, name: x.name, click: () => this.select(x.code) })) : [];
+    const mqRes = s.geo && (mqn || s.mListOpen) ? s.geo.municipalities.filter(m => nz(m.name).includes(mqn)).slice(0, mqn ? 8 : 200).map(m => ({ name: m.name, click: () => this.setState({ muni: m.code, mq: '', mListOpen: false }) })) : [];
+    const rows2 = D.election2024, order = [...rows2.entries()].sort((x, y) => y[1][3] - x[1][3]).map(e => e[0]);
+    const selCode = s.code, idxAll = statesData.findIndex(x => x.code === selCode);
+    const mk = (tag, c) => { const st = sb.get(c), p = rows2.get(c)[3]; return { tag, name: st.name, w: p + '%', val: isElection ? p.toFixed(1) + '% participación' : st.censo.populationTotal.toLocaleString('es-MX') + ' hab.', click: () => this.select(c) }; };
+    const related = selCode && idxAll >= 0 ? [
+      mk('Mayor participación', order[0] === selCode ? order[1] : order[0]),
+      mk('Menor participación', order[31] === selCode ? order[30] : order[31]),
+      mk('Estado anterior', statesData[(idxAll + 31) % 32].code),
+      mk('Estado siguiente', statesData[(idxAll + 1) % 32].code),
+    ] : [];
+    const sel = s.code ? sb.get(s.code) : null;
+    const row = sel && isElection ? election2024.get(sel.code) : null;
+    const v = s.view, zp = Math.round(v.zoom * 100);
+    const g = s.geo, gw = g ? +g.viewBox.split(' ')[2] : 1, gh = g ? +g.viewBox.split(' ')[3] : 1, mv = s.mView;
+    const mSel = g && s.muni ? g.municipalities.find(m => m.code === s.muni) : null;
+    const mHov = g && s.mHover ? g.municipalities.find(m => m.code === s.mHover) : null;
+    const muniRelated = (() => {
+      if (!g) return [];
+      const ms = g.municipalities; if (ms.length < 3) return [];
+      if (g._ext == null) { g._ext = {}; ms.forEach(m => { const n = (m.d.match(/-?\d+\.?\d*/g) || []).map(Number); let x0 = 1e9, x1 = -1e9, y0 = 1e9, y1 = -1e9; for (let k = 0; k + 1 < n.length; k += 2) { x0 = Math.min(x0, n[k]); x1 = Math.max(x1, n[k]); y0 = Math.min(y0, n[k + 1]); y1 = Math.max(y1, n[k + 1]); } g._ext[m.code] = (x1 - x0) * (y1 - y0); }); }
+      const ext = g._ext, by = ms.slice().sort((a, b) => ext[b.code] - ext[a.code]), mx = ext[by[0].code];
+      const al = ms.slice().sort((a, b) => a.name.localeCompare(b.name, 'es')), cur = mSel ? al.findIndex(m => m.code === mSel.code) : 0;
+      const mkm = (tag, m) => ({ tag, name: m.name, w: Math.max(6, Math.round(ext[m.code] / mx * 100)) + '%', val: 'Toca para verlo en el mapa', click: () => { this.setState({ muni: m.code }); const el = document.querySelector('.state-drawer'); if (el) el.scrollTo({ top: 0, behavior: 'smooth' }); } });
+      return [mkm('Municipio más extenso', by[0]), mkm('Municipio más pequeño', by[by.length - 1]), mkm('Anterior (A–Z)', al[(cur + al.length - 1) % al.length]), mkm('Siguiente (A–Z)', al[(cur + 1) % al.length])];
+    })();
+const FP = { 'Educación': [['Becas y útiles gratis en primaria','Más maestros en escuelas rurales'],['Internet en todas las secundarias','Talleres de oficios tras la escuela'],['Mantenimiento mensual de escuelas','Comedor escolar en zonas marginadas']], 'Salud': [['Centro de salud abierto las 24 horas','Medicinas surtidas al 100%'],['Brigadas médicas en colonias','Citas por WhatsApp sin filas'],['Más ambulancias por municipio','Atención de salud mental gratuita']], 'Calles': [['Bacheo permanente en 90 días','Alumbrado LED en cada cuadra'],['Banquetas accesibles y ciclovías','Reparación de drenaje pluvial'],['Transporte público con rutas nuevas','Parques limpios y vigilados']], 'Seguridad': [['Más policía de proximidad','Cámaras y botones de alerta vecinal'],['Patrullaje con enfoque preventivo','Atención 24/7 a víctimas'],['Juntas vecinales de seguridad','Programas para jóvenes en riesgo']], 'Servicios': [['Agua potable todos los días','Recolección de basura con horarios fijos'],['Trámites municipales en línea','Mejor alumbrado y drenaje'],['Mercados y centros comunitarios renovados','Tarifas justas de agua']] };
+    const FC = [{ name: 'Candidatura A', role: 'Presidencia municipal · Ejemplo', ini: 'A', color: '#5b3a82', tray: '12 años en servicio público municipal; fue regidora y directora de obras.' }, { name: 'Candidatura B', role: 'Presidencia municipal · Ejemplo', ini: 'B', color: '#b83280', tray: 'Docente y líder comunitaria; impulsó cooperativas vecinales por 15 años.' }, { name: 'Candidatura C', role: 'Presidencia municipal · Ejemplo', ini: 'C', color: '#c9973f', tray: 'Empresario local y ex consejero; presidió una cámara de comercio.' }];
+    const CN = ['Educación', 'Salud', 'Calles', 'Seguridad', 'Servicios'];
+    const KW = [[/escuel|educ|maestr|alumn|beca|univers/i, 0], [/salud|hospital|medic|clinic|doctor|ambulan/i, 1], [/segur|robo|viol|delinc|crimen|asalt|polic/i, 3], [/agua|drenaj|basura|luz|energ|servicio|fuga/i, 4], [/bache|calle|aluzbr|alumbr|transporte|camion|banqueta|paviment/i, 2]];
+    const hit = KW.find(([re]) => re.test(s.posted || ''));
+    const catName = CN[hit ? hit[1] : s.cat];
+    const fo = [['none', 'Sin filtro', null], ['voted', 'Sí votaron', 3], ['abstained', 'No votaron', 4], ['annulled', 'Votos anulados', 6]];
+    const c = sel ? sel.censo : null;
+    return {
+      loadingDisplay: 'none',
+      menuOpen: s.menuOpen, navClass: s.menuOpen ? 'is-open' : '', toggleMenu: () => this.setState({ menuOpen: !s.menuOpen }),
+      nav0: s.panel === '' ? 'on' : '', nav1: s.panel === 'participa' ? 'on' : '', nav2: s.panel === 'glosario' ? 'on' : '', nav3: s.panel === 'fuentes' ? 'on' : '',
+      openExplore: () => this.setState({ panel: '', menuOpen: false, code: '', muni: '' }), openParticipa: () => this.setState({ panel: 'participa', menuOpen: false }), openGlosario: () => this.setState({ panel: 'glosario', menuOpen: false }), openFuentes: () => this.setState({ panel: 'fuentes', menuOpen: false }),
+      showParticipa: s.panel === 'participa' ? 'block' : 'none', showGlosario: s.panel === 'glosario' ? 'block' : 'none', showFuentes: s.panel === 'fuentes' ? 'block' : 'none',
+      cats: ['Educación', 'Salud', 'Calles', 'Seguridad', 'Servicios'].map((name, i) => ({ name, on: s.cat === i, cls: s.cat === i ? 'on' : '', click: () => { this.setState({ cat: i, posted: name, fOpen: true, fLoad: true }); clearTimeout(this._fl); this._fl = setTimeout(() => this.setState({ fLoad: false }), 900); } })),
+      post: s.post, posted: s.posted, copied: s.copied, onPost: e => this.setState({ post: e.target.value }),
+      submitPost: e => { e.preventDefault(); const t = s.post.trim(); if (t) { this.setState({ posted: t, post: '', fOpen: true, fLoad: true }); clearTimeout(this._fl); this._fl = setTimeout(() => this.setState({ fLoad: false }), 1100); setTimeout(() => { const c = document.querySelector('.fx-wrap'), p = document.querySelector('.gn-panel[style*="block"]'); if (c && p && innerWidth < 900) p.scrollTo({ top: c.closest('.gn-card').offsetTop - 12, behavior: 'smooth' }); }, 80); } },
+      fClosed: !s.fOpen, fMore: s.fMore, fMoreOpen: () => this.setState({ fMore: true }), fMoreClose: () => this.setState({ fMore: false, fOpen: false }),
+      fichasFull: FC.map(c => ({ ...c, props: [0, 1, 2].flatMap(i => FP[catName][i] || []).slice(0, 4) })),
+      fOpen: s.fOpen, fLoad: s.fLoad, fCat: catName, fClose: () => this.setState({ fOpen: false }), fStop: e => e.stopPropagation(),
+      fichas: s.fLoad ? [] : FC.slice(0, 1).map((c, i) => ({ ...c, props: FP[catName][i], delay: (i * 0.18) + 's' })),
+      shareSub: s.copied ? 'Enlace copiado' : 'Invita a votar',
+      share: () => { const url = location.href; if (navigator.share) navigator.share({ title: 'Guardianes Ciudadanos', text: 'Mira cómo votó tu estado en 2024.', url }).catch(() => {}); else if (navigator.clipboard) navigator.clipboard.writeText(url).then(() => this.setState({ copied: true })).catch(() => {}); },
+      gloss: [['Lista nominal', 'Es la lista de personas con credencial para votar vigente. Si estás en ella, puedes votar el día de la elección.'], ['Abstencionismo', 'Pasa cuando alguien que sí puede votar decide no hacerlo. Si no votas, otras personas deciden por ti.'], ['Voto válido y voto nulo', 'Es válido cuando marcas con claridad una opción: ese cuenta. Es nulo cuando la boleta queda marcada de forma que no se entiende o sin marcar: no suma para nadie.'], ['Casilla electoral', 'Es el lugar donde votas, en secreto. Suele estar en una escuela o un espacio público cerca de tu casa, según tu sección electoral.']].map(([term, def], i) => ({ n: '0' + (i + 1), term, def, open: s.gIdx === i, cls: 'gn-g' + (s.gIdx === i ? ' is-open' : ''), sign: s.gIdx === i ? '−' : '+', click: () => this.setState({ gIdx: s.gIdx === i ? -1 : i }) })),
+      flowClass: 'flow-' + (s.full ? 'full' : s.step) + (s.full && s.coach ? ' coach' : '') + (s.leaving ? ' leaving' : ''),
+      goMap: () => this.setState({ step: 'map', full: true, coach: false, leaving: false }),
+      goIntro: () => this.advance('intro'),
+      dot1: s.step === 'intro' ? 'sd-on' : '',
+      dot2: s.step === 'map' ? 'sd-on' : '',
+      onWheel: e => { this._act = Date.now(); const t = e.currentTarget; if (Math.abs(e.deltaX) > 40 || (e.deltaY > 40 && t.scrollTop + t.clientHeight >= t.scrollHeight - 2)) this.advance(); },
+      bump: () => { this._act = Date.now(); },
+      openFull: () => this.setState({ full: true, coach: false }), toggleCoach: () => this.setState({ coach: !s.coach }),
+      dismissCoach: () => this.setState({ coach: false }),
+      flowBack: () => s.full ? this.setState({ full: false, coach: false, tip: null }) : this.setState({ step: 'intro', tip: null }),
+      flowBackLabel: s.full ? 'Salir' : 'Inicio',
+      tStart: e => { this._tx = e.touches[0].clientX; },
+      tEnd: e => { const dx = e.changedTouches[0].clientX - (this._tx || 0); if (dx < -60) this.advance(); },
+      years: Array.from({ length: 16 }, (_, i) => 2024 - i), year: s.year,
+      onYear: e => this.setState({ year: Number(e.target.value), metric: 'none', filtersOpen: false, tip: null }),
+      stateOptions: statesData.map(x => ({ code: x.code, name: x.name })), code: s.code,
+      onGoto: e => this.select(e.target.value),
+      toolbarLabel: `32 estados · ${isElection ? 'Elecciones 2024' : 'Censo'}`,
+      instructions: hasData ? 'Descubre cómo ha votado México a lo largo de su historia. Tu voto sí se ve y sí cuenta: busca tu estado y tu municipio, y mira cuánto pesa tu participación.' : `Año seleccionado: ${s.year}.`,
+      noData: !hasData, svgClass: 'mexico-map-svg' + (isFiltered ? ' has-metric' : ''),
+      viewBox: `${v.x} ${v.y} ${900 / v.zoom} ${560 / v.zoom}`, paths,
+      onMove: e => { if (!s.tip) return; const b = stage(e); this.setState({ tip: { ...s.tip, x: e.clientX - b.left, y: e.clientY - b.top, w: b.width, h: b.height } }); },
+      hide: () => this.setState({ hovered: '', tip: null }),
+      pDown: e => { if (this.state.coach) this.setState({ coach: false }); this._pts = this._pts || new Map(); if (!this._pts.size) { this._drag = false; this._trav = 0; } else this._drag = true; this._pts.set(e.pointerId, { x: e.clientX, y: e.clientY }); },
+      pMove: e => {
+        const pts = this._pts; if (!pts || !pts.has(e.pointerId)) return;
+        const prev = pts.get(e.pointerId), before = [...pts.values()];
+        pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        const after = [...pts.values()];
+        this._trav += Math.hypot(e.clientX - prev.x, e.clientY - prev.y);
+        if (this._trav > 6 || after.length > 1) this._drag = true;
+        if (!this._drag) return;
+        const mid = p => ({ x: p.reduce((s, q) => s + q.x, 0) / p.length, y: p.reduce((s, q) => s + q.y, 0) / p.length });
+        const dist = p => Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
+        const ratio = before.length === 2 ? dist(after) / Math.max(1, dist(before)) : 1;
+        if (s.tip) this.setState({ tip: null, hovered: '' });
+        this.panZoom(e.currentTarget, mid(before), mid(after), ratio);
+      },
+      pUp: e => { if (this._pts) this._pts.delete(e.pointerId); setTimeout(() => { if (!this._pts || !this._pts.size) this._drag = false; }, 0); },
+      onWheel: e => { this.panZoom(e.currentTarget, { x: e.clientX, y: e.clientY }, { x: e.clientX, y: e.clientY }, e.deltaY < 0 ? 1.2 : 1 / 1.2); },
+      gTabIml: s.gTab === 'iml', gTabImv: s.gTab === 'imv',
+      setIml: () => this.setState({ gTab: 'iml' }), setImv: () => this.setState({ gTab: 'imv' }),
+      g: row ? (() => { const v = row[s.gTab === 'iml' ? 7 : 8], who = s.gTab === 'iml' ? 'tienen credencial para votar' : 'fueron a votar';
+        const fig = (total, col) => Array.from({ length: 10 }, (_, i) => { const f = Math.max(0, Math.min(1, total / 10 - i)), p = Math.round(f * 100); return { bg: `linear-gradient(to top, ${col} ${p}%, #e7dff0 ${p}%)`, tip: p === 100 ? '10 personas' : p === 0 ? '' : `${Math.round(f * 10)} personas` }; });
+        const ws = 100 / (100 + v), C = 238.76; const iml = s.gTab === 'iml'; return { value: v.toFixed(1), who, official: iml ? 'Índice de Masculinidad de la Lista Nominal (IML)' : 'Índice de Masculinidad de Votantes (IMV)', plain: iml ? 'En palabras simples: compara cuántos hombres y mujeres tienen credencial para votar.' : 'En palabras simples: compara cuántos hombres y mujeres fueron a votar.', dash: `${(ws * C).toFixed(1)} ${C}`, womenPct: (ws * 100).toFixed(1) + '%', menPct: ((1 - ws) * 100).toFixed(1) + '%', women: fig(100, '#b83280'), men: fig(v, '#5b3a82'),
+          note: v < 100 ? `Entre quienes ${s.gTab === 'iml' ? 'pueden votar' : 'votaron'} hay más mujeres que hombres.` : v > 100 ? `Entre quienes ${s.gTab === 'iml' ? 'pueden votar' : 'votaron'} hay más hombres que mujeres.` : 'Hay igual número de mujeres y hombres.' }; })() : {},
+      q: s.q, qOpen: s.listOpen || (s.qOpen && s.q.trim().length > 0), toggleList: () => this.setState({ listOpen: !s.listOpen, qOpen: false }), qResults: qRes, qEmpty: qRes.length === 0,
+      onQ: e => this.setState({ q: e.target.value, qOpen: true, listOpen: false }), qFocus: () => this.setState({ qOpen: true }),
+      mq: s.mq, mqOpen: s.mListOpen || s.mq.trim().length > 0, toggleMList: () => this.setState({ mListOpen: !s.mListOpen, mq: '' }), mqResults: mqRes, mqEmpty: mqRes.length === 0, onMq: e => this.setState({ mq: e.target.value, mListOpen: false }),
+      crumbStateCurrent: s.muni ? 'false' : 'page',
+      story: row ? (() => { const part = row[3], an = row[6]; const v = Math.round(part - an), a = Math.round(an), n = 100 - v - a, sp = s.sp, hi = s.sHi; const grp = i => i < v ? 0 : i < v + a ? 1 : 2; const colors = ['#5b3a82', '#c8984b', '#b83280']; const st2 = nf.format(row[1]), times = row[1] / 83000;
+        const dots = Array.from({ length: 100 }, (_, i) => { const g = grp(i); return { c: colors[g], cls: (i < sp ? 'on' : '') + (hi >= 0 && hi !== g ? ' dim' : '') + (hi === g ? ' hi' : '') }; });
+        const cnt = [Math.min(v, sp), Math.max(0, Math.min(a, sp - v)), Math.max(0, Math.min(n, sp - v - a))]; const tot = [v, a, n], lab = ['fueron a votar', 'anularon su boleta', 'se quedaron en casa'];
+        const keys = [0, 1, 2].map(g => ({ c: colors[g], n: cnt[g], label: lab[g], on: hi === g, cls: (sp > (g === 0 ? 0 : g === 1 ? v : v + a) ? 'seen' : '') + (hi === g ? ' sel' : ''), click: () => this.setState({ sHi: hi === g ? -1 : g }) }));
+        const done = sp >= 100; const ph = sp <= v ? 0 : sp <= v + a ? 1 : 2;
+        const caps = [`Primero, quienes sí fueron a votar en ${sel.name}: ${v} de cada 100.`, `Luego, quienes anularon su boleta: ${a} de cada 100.`, `Y quienes dejaron que otros decidieran: ${n} de cada 100.`];
+        return { title: `Si ${sel.name} fuera un salón de 100 personas…`, dots, keys, done, cap: done ? 'Así votó tu estado: de cada 100 personas, esto fue lo que pasó.' : caps[ph], catCls: 'story-cat' + (done ? '' : ' is-pointing'),
+          text: `De cada 100 personas con credencial para votar en ${sel.name}, ${v} fueron a las urnas y votaron válido, ${a} anularon su boleta y ${n} dejaron que otros decidieran por ellas.`,
+          stadium: `En total fueron ${st2} votos: como llenar ${times < 1 ? 'casi un' : times.toFixed(1).replace('.0','') + ' veces el'} Estadio Azteca (unos 83,000 lugares). Cada voto cuenta, y cada ausencia también.` }; })() : {},
+      replayStory: () => { this._played = true; this.playStory(); },
+      hintEvents: s.hint === 0 ? 'none' : 'auto',
+      scrollDown: () => { const el = document.querySelector('.state-drawer'); if (el) el.scrollBy({ top: Math.round(el.clientHeight * 0.8), behavior: 'smooth' }); },
+      backLabel: s.muni ? 'Regresar al estado' : ((this._hist || []).length ? 'Regresar' : 'Volver al mapa'),
+      goBack: () => { if (s.muni) { this.setState({ muni: '', mView: { x: 0, y: 0, zoom: 1 } }); return; } const h = (this._hist || []).slice(); const prev = h.pop(); this._hist = h; if (prev) { this._h = 1; this.setState({ code: prev, muni: '', mq: '', hint: 1, mView: { x: 0, y: 0, zoom: 1 } }); this.loadGeo(prev); } else this.setState({ code: '', muni: '' }); },
+      goHome: () => { this._hist = []; this.setState({ step: 'intro', full: false, coach: false, code: '', muni: '', mq: '', q: '', qOpen: false, listOpen: false, metric: 'none', filtersOpen: false, tip: null, view: { x: 0, y: 0, zoom: 1 } }); },
+      related: muniRelated.length ? muniRelated : related, dockOn: !!(sel && s.geo),
+      mDown: e => { this._mp = this._mp || new Map(); if (!this._mp.size) { this._mdrag = false; this._mtrav = 0; } else this._mdrag = true; this._mp.set(e.pointerId, { x: e.clientX, y: e.clientY }); },
+      mMove: e => {
+        const pts = this._mp; if (!pts || !pts.has(e.pointerId)) return;
+        const prev = pts.get(e.pointerId), before = [...pts.values()];
+        pts.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        const after = [...pts.values()];
+        this._mtrav += Math.hypot(e.clientX - prev.x, e.clientY - prev.y);
+        if (this._mtrav > 6 || after.length > 1) this._mdrag = true;
+        if (!this._mdrag) return;
+        const mid = p => ({ x: p.reduce((a, q) => a + q.x, 0) / p.length, y: p.reduce((a, q) => a + q.y, 0) / p.length });
+        const dist = p => Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y);
+        const ratio = before.length === 2 ? dist(after) / Math.max(1, dist(before)) : 1;
+        this.panZoom(e.currentTarget, mid(before), mid(after), ratio, 'mView', gw, gh);
+      },
+      mUp: e => { if (this._mp) this._mp.delete(e.pointerId); setTimeout(() => { if (!this._mp || !this._mp.size) this._mdrag = false; }, 0); },
+      mWheel: e => { this.panZoom(e.currentTarget, { x: e.clientX, y: e.clientY }, { x: e.clientX, y: e.clientY }, e.deltaY < 0 ? 1.2 : 1 / 1.2, 'mView', gw, gh); },
+      zoomPct: zp, zoomMin: v.zoom <= 1, zoomMax: v.zoom >= 6,
+      zoomIn: () => this.zoom('view', 1.4, 900, 560), zoomOut: () => this.zoom('view', 1 / 1.4, 900, 560), zoomReset: () => this.setState({ view: { x: 0, y: 0, zoom: 1 } }),
+      darkText: metricLabel + ' (la respuesta)', lightText: 'menor porcentaje, para comparar',
+      isFiltered, notFiltered: !isFiltered, metricLabel, minLabel: min.toFixed(1) + '%', maxLabel: max.toFixed(1) + '%',
+      tooltip: s.tip ? (() => { const W = 250, H = 150, m = 8, sw = s.tip.w || 600, sh = s.tip.h || 600; let l = s.tip.x + 18; if (l + W + m > sw) l = s.tip.x - W - 18; l = Math.max(m, Math.min(l, sw - W - m)); const tp = Math.max(m, Math.min(s.tip.y - 16, sh - H - m)); const flip = l < s.tip.x; return { cls: flip ? 'flip' : '', arrowTop: Math.max(10, Math.min(s.tip.y - tp - 7, H - 24)), left: l, top: tp, source: `${isElection ? 'INE · 2024' : 'INEGI · 2020'} · ${s.tip.st.code}`, name: s.tip.st.name, fact: s.tip.fact }; })() : null,
+      _unused: s.tip ? {  source: `${isElection ? 'INE · 2024' : 'INEGI · 2020'} · ${s.tip.st.code}`, name: s.tip.st.name, fact: s.tip.fact } : null,
+      resetMetric: () => this.setState({ metric: 'none', filtersOpen: false, tip: null }),
+      toggleFilters: () => this.setState({ filtersOpen: !s.filtersOpen }),
+      filtersOpen: s.filtersOpen, filterTriggerLabel: isFiltered ? metricLabel : '¿Cómo se votó?',
+      filterTriggerPct: isFiltered ? election2024Totals[metricIndex].toFixed(1) + '%' : '',
+      filterSub: isElection ? 'Elige qué quieres ver en el mapa · 2024' : 'Disponible solo para 2024',
+      filterOptions: fo.map(([val, label, idx]) => ({ label, disabled: !isElection && val !== 'none', pressed: s.metric === val, check: s.metric === val ? '✓' : '', pct: isElection && idx !== null ? election2024Totals[idx].toFixed(1) + '%' : '', pctDisplay: isElection && idx !== null ? 'inline-block' : 'none', click: () => this.setState({ metric: val, filtersOpen: false, tip: null }) })),
+      backdropClass: 'map-drawer-backdrop' + (sel ? ' is-visible' : ''),
+      drawerClass: 'state-drawer' + (sel ? ' is-open' : '') + (s.expanded ? ' is-expanded' : ''),
+      sliderPrev: () => { const e = document.querySelector('.data-slider'); if (e) e.scrollBy({ left: -e.clientWidth * 0.7, behavior: 'smooth' }); },
+      sliderNext: () => { const e = document.querySelector('.data-slider'); if (e) e.scrollBy({ left: e.clientWidth * 0.7, behavior: 'smooth' }); },
+      vcyCls: s.vc === 'y' ? 'vc-open' : '', vcyOpen: s.vc === 'y', vcyClosed: s.vc !== 'y', vcyToggle: () => this.setState({ vc: s.vc === 'y' ? '' : 'y' }), vcyDash: row ? (row[3] / 100 * 157.08).toFixed(2) : 0,
+      vcnCls: s.vc === 'n' ? 'vc-open' : '', vcnOpen: s.vc === 'n', vcnClosed: s.vc !== 'n', vcnToggle: () => this.setState({ vc: s.vc === 'n' ? '' : 'n' }), vcnDash: row ? (row[4] / 100 * 157.08).toFixed(2) : 0,
+      vcaCls: s.vc === 'a' ? 'vc-open' : '', vcaOpen: s.vc === 'a', vcaClosed: s.vc !== 'a', vcaToggle: () => this.setState({ vc: s.vc === 'a' ? '' : 'a' }), vcaDash: row ? (row[6] / 100 * 157.08).toFixed(2) : 0,
+      backToState: () => { const el = document.querySelector('.state-drawer'); if (el) el.scrollTo({ top: 0, behavior: 'smooth' }); },
+      closeDrawer: () => this.setState({ code: '', muni: '', hint: 1 }),
+      onDrawerScroll: e => { const el = e.currentTarget, h = el.scrollTop < 24 ? 1 : 0; if (h !== this._h) { this._h = h; this.setState({ hint: h }); } },
+      hintOpacity: s.hint === 0 ? 0 : 1,
+      toggleExpand: () => this.setState({ expanded: !s.expanded }),
+      expandIcon: s.expanded ? 'M4 9h5V4M20 15h-5v5M9 9 3 3M15 15l6 6' : 'M9 3H3v6M15 21h6v-6M3 3l7 7M21 21 14 14',
+      st: sel, geo: g, isElection, notElection: !isElection,
+      muniHeading: s.code === '09' ? 'Elige una alcaldía' : 'Elige un municipio',
+      muniCount: g ? `${g.municipalities.length} ${s.code === '09' ? 'alcaldías' : 'municipios'}` : '',
+      muniNone: !s.muni, muni: s.muni, muniSelected: !!s.muni,
+      muniBackLabel: s.muni ? `← Volver a los datos de ${sel && sel.name}` : `Estás viendo los datos de todo ${sel && sel.name}`,
+      muniBack: () => this.setState({ muni: '', mView: { x: 0, y: 0, zoom: 1 } }),
+      mZoomPct: Math.round(mv.zoom * 100), mZoomMin: mv.zoom <= 1, mZoomMax: mv.zoom >= 6,
+      mZoomIn: () => this.zoom('mView', 1.4, gw, gh), mZoomOut: () => this.zoom('mView', 1 / 1.4, gw, gh), mZoomReset: () => this.setState({ mView: { x: 0, y: 0, zoom: 1 } }),
+      muniViewBox: g ? `${mv.x} ${mv.y} ${gw / mv.zoom} ${gh / mv.zoom}` : '0 0 1 1',
+      munis: g ? g.municipalities.map(m => ({ d: m.d, name: m.name, cls: s.muni === m.code ? 'is-selected' : '', enter: () => this.setState({ mHover: m.code }), leave: () => this.setState({ mHover: '' }), click: () => { if (this._mdrag) return; this.setState({ muni: m.code }); } })) : [],
+      muniOptions: g ? g.municipalities.map(m => ({ code: m.code, name: m.name })) : [],
+      muniName: (mHov || mSel) ? (mHov || mSel).name : 'Toca una zona del mapa para ver su nombre',
+      muniSelect: e => this.setState({ muni: e.target.value }),
+      d: row ? { nominal: nf.format(row[0]), voted: nf.format(row[1]), not: nf.format(row[2]), votedPct: electionValue(row[3], 3), notPct: electionValue(row[4], 4), votedW: row[3] + '%', notW: row[4] + '%', ann: nf.format(row[5]), annPct: electionValue(row[6], 6), annW: row[6] + '%', rank: order.indexOf(sel.code) + 1, natW: election2024Totals[3] + '%', natLabel: election2024Totals[3].toFixed(1) + '%', iml: electionValue(row[7], 7), imv: electionValue(row[8], 8), ...(() => { const o = {}; [['iml', row[7], 'registrados para votar'], ['imv', row[8], 'que sí votaron']].forEach(([k, v, w]) => { const m = Math.max(100, v); o[k + 'WW'] = (100 / m * 100) + '%'; o[k + 'MW'] = (v / m * 100) + '%'; o[k + 'Note'] = v < 100 ? `Hay más mujeres que hombres ${w}: por cada 100 mujeres, ${v.toFixed(1)} hombres.` : v > 100 ? `Hay más hombres que mujeres ${w}: por cada 100 mujeres, ${v.toFixed(1)} hombres.` : `Hay igual número de mujeres y hombres ${w}.`; }); return o; })() } : {},
+      c: c ? { pop: nf.format(c.populationTotal), women: c.womenPercent, men: c.menPercent, age: c.medianAge, density: nf.format(c.density) } : {},
+      sourceNote: isElection ? 'Fuente: resultados electorales 2024. Cifras tal como fueron proporcionadas.' : 'Fuente: INEGI, Censo de Población y Vivienda 2020. Cifras redondeadas para visualización.',
+    };
+  }
+}
+</script>
+</body>
+</html>
